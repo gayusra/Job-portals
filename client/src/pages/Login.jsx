@@ -1,0 +1,152 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from '../utils/axios';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
+
+const Login = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data } = await axios.post('/auth/login', formData);
+      login(data);
+      toast.success('Logged in successfully!');
+      navigate('/');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>Welcome Back</h2>
+        <p style={styles.subtitle}>Login to your account</p>
+
+        <form onSubmit={handleSubmit}>
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Email</label>
+            <input
+              type='email'
+              name='email'
+              value={formData.email}
+              onChange={handleChange}
+              placeholder='Enter your email'
+              style={styles.input}
+              required
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Password</label>
+            <input
+              type='password'
+              name='password'
+              value={formData.password}
+              onChange={handleChange}
+              placeholder='Enter your password'
+              style={styles.input}
+              required
+            />
+          </div>
+
+          <button
+            type='submit'
+            style={styles.button}
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+
+        <p style={styles.footer}>
+          Don't have an account?{' '}
+          <Link to='/register' style={styles.link}>Register here</Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f5f5f5'
+  },
+  card: {
+    backgroundColor: 'white',
+    padding: '40px',
+    borderRadius: '10px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+    width: '100%',
+    maxWidth: '400px'
+  },
+  title: {
+    fontSize: '28px',
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: '8px'
+  },
+  subtitle: {
+    color: '#7f8c8d',
+    marginBottom: '30px'
+  },
+  formGroup: {
+    marginBottom: '20px'
+  },
+  label: {
+    display: 'block',
+    marginBottom: '6px',
+    fontWeight: '600',
+    color: '#2c3e50'
+  },
+  input: {
+    width: '100%',
+    padding: '12px',
+    border: '1px solid #ddd',
+    borderRadius: '6px',
+    fontSize: '15px',
+    outline: 'none'
+  },
+  button: {
+    width: '100%',
+    padding: '12px',
+    backgroundColor: '#3498db',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    marginTop: '10px'
+  },
+  footer: {
+    textAlign: 'center',
+    marginTop: '20px',
+    color: '#7f8c8d'
+  },
+  link: {
+    color: '#3498db',
+    fontWeight: 'bold'
+  }
+};
+
+export default Login;
