@@ -162,9 +162,31 @@ const JobDetail = () => {
     }
   };
 
-  if (loading) {
+/*   if (loading) {
     return <div style={styles.loading}>Loading job details...</div>;
-  }
+  } */
+
+    if (loading) {
+  return (
+    <div style={{ minHeight:'70vh', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+      `}</style>
+      <div style={{ background:'white', borderRadius:'24px', padding:'52px 48px', textAlign:'center', boxShadow:'0 20px 60px rgba(99,102,241,0.1)', border:'1px solid #e2e8f0', maxWidth:'380px', width:'100%' }}>
+        <div style={{ fontSize:'40px', marginBottom:'20px' }}>💼</div>
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:'20px' }}>
+          <div style={{ width:'56px', height:'56px', border:'4px solid #eef2ff', borderTopColor:'#6366f1', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
+        </div>
+        <div style={{ display:'flex', gap:'6px', justifyContent:'center', marginBottom:'16px' }}>
+          {[0,1,2].map(i => (<div key={i} style={{ width:'8px', height:'8px', borderRadius:'50%', backgroundColor:'#6366f1', animation:`bounce 1.2s ease-in-out ${i*0.15}s infinite` }} />))}
+        </div>
+        <h3 style={{ fontSize:'18px', fontWeight:'700', color:'#0f172a', marginBottom:'6px' }}>Loading Job Details...</h3>
+        <p style={{ fontSize:'13px', color:'#94a3b8' }}>Please wait a moment</p>
+      </div>
+    </div>
+  );
+}
 
   if (!job) return null;
 
