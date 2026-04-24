@@ -191,11 +191,43 @@ const getApplicationById = async (req, res) => {
   }
 };
 
+// @desc    Get Application Counts for Employer's Jobs
+// @route   GET /api/applications/employer/counts
+// @access  Private (Employer only)
+const getEmployerApplicationCounts = async (req, res) => {
+  try {
+    // Get all jobs posted by this employer
+    const jobs = await Job.find({ postedBy: req.user._id });
+    const jobIds = jobs.map((j) => j._id);
+
+    if (jobIds.length === 0) {
+      return res.status(200).json({ countMap: {} });
+    }
+
+    // Count applications per job using aggregation
+    const counts = await Application.aggregate([
+      { $match: { job: { $in: jobIds } } },
+      { $group: { _id: '$job', count: { $sum: 1 } } }
+    ]);
+
+    // Build a map of jobId -> count
+    const countMap = {};
+    counts.forEach((c) => {
+      countMap[c._id.toString()] = c.count;
+    });
+
+    res.status(200).json({ countMap });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   applyJob,
   getJobApplications,
   getMyApplications,
   updateApplicationStatus,
   withdrawApplication,
-  getApplicationById
+  getApplicationById,
+  getEmployerApplicationCounts
 };
