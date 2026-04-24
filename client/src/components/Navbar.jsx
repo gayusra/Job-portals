@@ -492,6 +492,25 @@ const Navbar = () => {
                 My Applications
               </Link>
             )}
+
+            <Link
+  to='/ats-checker'
+  className={`nav-link ${isActive('/ats-checker') ? 'active' : ''}`}
+  style={{
+    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    color: 'white',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontSize: '13px',
+    fontWeight: '700',
+    boxShadow: '0 4px 12px rgba(99,102,241,0.35)'
+  }}
+>
+  ✨ ATS Checker
+</Link>
+
+{/* Mobile menu — add inside mobile-menu div */}
+
           </div>
 
           {/* Right Side */}

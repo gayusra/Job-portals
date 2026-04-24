@@ -15,6 +15,7 @@ import Applicants from './pages/Applicants';
 import MyApplications from './pages/MyApplications';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
+import ATSChecker from './pages/ATSChecker';
 
 
 function App() {
@@ -29,6 +30,8 @@ function App() {
           <Route path='/register' element={<Register />} />
           <Route path='/jobs' element={<Jobs />} />
           <Route path='/jobs/:id' element={<JobDetail />} />
+          <Route path='/ats-checker' element={<ATSChecker />} />
+          
        
 
           {/* Employer Only Routes */}
