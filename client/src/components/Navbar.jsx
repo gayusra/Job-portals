@@ -10,7 +10,6 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -21,7 +20,6 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
     setDropdownOpen(false);
@@ -35,12 +33,7 @@ const Navbar = () => {
 
   const getInitials = (name) => {
     if (!name) return '?';
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   const isActive = (path) => location.pathname === path;
@@ -97,9 +90,7 @@ const Navbar = () => {
           letter-spacing: -0.5px;
         }
 
-        .logo-text span {
-          color: #818cf8;
-        }
+        .logo-text span { color: #818cf8; }
 
         .navbar-links {
           display: flex;
@@ -166,10 +157,7 @@ const Navbar = () => {
           box-shadow: 0 6px 20px rgba(99,102,241,0.4);
         }
 
-        /* Profile Button */
-        .profile-wrapper {
-          position: relative;
-        }
+        .profile-wrapper { position: relative; }
 
         .profile-btn {
           display: flex;
@@ -233,11 +221,8 @@ const Navbar = () => {
           margin-left: 2px;
         }
 
-        .chevron.open {
-          transform: rotate(180deg);
-        }
+        .chevron.open { transform: rotate(180deg); }
 
-        /* Dropdown */
         .dropdown {
           position: absolute;
           top: calc(100% + 12px);
@@ -306,9 +291,7 @@ const Navbar = () => {
           text-transform: capitalize;
         }
 
-        .dropdown-section {
-          padding: 8px;
-        }
+        .dropdown-section { padding: 8px; }
 
         .dropdown-item {
           display: flex;
@@ -350,7 +333,6 @@ const Navbar = () => {
           margin: 4px 8px;
         }
 
-        /* Post Job Button */
         .btn-post-job {
           background: linear-gradient(135deg, #10b981, #059669);
           color: white;
@@ -369,60 +351,165 @@ const Navbar = () => {
           box-shadow: 0 6px 20px rgba(16,185,129,0.35);
         }
 
+        /* ══════════════════════════════════
+           ✨ ATS CHECKER GLOW BUTTON
+        ══════════════════════════════════ */
+
         .ats-btn {
-  background: linear-gradient(135deg, #ff6a00, #ee0979); /* orange → pink */
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 12px rgba(238, 9, 121, 0.6);
-}
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 9px 18px;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 700;
+          color: white;
+          text-decoration: none;
+          overflow: hidden;
+          background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+          background-size: 200% 200%;
+          animation: atsGradient 3s ease infinite,
+                     atsPulse 2.5s ease-in-out infinite;
+          transition: all 0.3s;
+          white-space: nowrap;
+          cursor: pointer;
+          z-index: 0;
+        }
 
-/* Glow pulse animation */
-@keyframes glowPulse {
-  0% { box-shadow: 0 0 10px rgba(255,106,0,0.6); }
-  50% { box-shadow: 0 0 25px rgba(238,9,121,1); }
-  100% { box-shadow: 0 0 10px rgba(255,106,0,0.6); }
-}
+        /* Gradient shift */
+        @keyframes atsGradient {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
 
-.ats-btn {
-  animation: glowPulse 2s infinite;
-}
+        /* Outer glow pulse */
+        @keyframes atsPulse {
+          0%, 100% {
+            box-shadow:
+              0 0 8px rgba(139,92,246,0.6),
+              0 0 20px rgba(99,102,241,0.4),
+              0 0 0 0 rgba(139,92,246,0.3);
+          }
+          50% {
+            box-shadow:
+              0 0 16px rgba(139,92,246,0.9),
+              0 0 40px rgba(99,102,241,0.6),
+              0 0 0 8px rgba(139,92,246,0);
+          }
+        }
 
-/* Shine effect */
-.ats-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent,
-    rgba(255,255,255,0.5),
-    transparent
-  );
-  transform: skewX(-20deg);
-  animation: shineMove 3s infinite;
-}
+        /* Shimmer sweep */
+        .ats-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 60%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.3),
+            transparent
+          );
+          transform: skewX(-15deg);
+          animation: atsShimmer 2.5s ease-in-out infinite;
+          z-index: 1;
+        }
 
-@keyframes shineMove {
-  0% { left: -75%; }
-  100% { left: 130%; }
-}
+        @keyframes atsShimmer {
+          0%   { left: -100%; }
+          60%  { left: 150%; }
+          100% { left: 150%; }
+        }
 
-/* Hover effect */
-.ats-btn:hover {
-  transform: translateY(-2px) scale(1.05);
-  background: linear-gradient(135deg, #ff512f, #dd2476);
-}
+        /* Outer ring glow layer */
+        .ats-btn::after {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #818cf8, #c084fc, #818cf8);
+          background-size: 200% 200%;
+          animation: atsGradient 3s ease infinite;
+          z-index: -1;
+          opacity: 0.7;
+          filter: blur(6px);
+        }
 
-        /* Mobile hamburger */
+        /* Glowing dot */
+        .ats-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: white;
+          flex-shrink: 0;
+          position: relative;
+          z-index: 2;
+          animation: atsDot 1.4s ease-in-out infinite;
+        }
+
+        @keyframes atsDot {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 4px white, 0 0 10px #c084fc;
+            opacity: 1;
+          }
+          50% {
+            transform: scale(0.65);
+            box-shadow: 0 0 8px white, 0 0 20px #818cf8;
+            opacity: 0.7;
+          }
+        }
+
+        .ats-btn-text {
+          position: relative;
+          z-index: 2;
+        }
+
+        .ats-btn:hover {
+          transform: translateY(-3px) scale(1.05);
+          animation: none;
+          box-shadow:
+            0 0 20px rgba(139,92,246,1),
+            0 0 50px rgba(99,102,241,0.7),
+            0 8px 25px rgba(139,92,246,0.5);
+        }
+
+        /* Mobile ATS button */
+        .ats-mobile-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 11px 14px;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 700;
+          color: white;
+          text-decoration: none;
+          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          background-size: 200% 200%;
+          animation: atsGradient 3s ease infinite, atsPulse 2.5s ease-in-out infinite;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .ats-mobile-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 60%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+          transform: skewX(-15deg);
+          animation: atsShimmer 2.5s ease-in-out infinite;
+        }
+
+        /* ══════════════════════════════════ */
+
         .hamburger {
           display: none;
           flex-direction: column;
@@ -442,7 +529,6 @@ const Navbar = () => {
           transition: all 0.3s;
         }
 
-        /* Mobile menu */
         .mobile-menu {
           display: none;
           background: #0d1220;
@@ -452,9 +538,7 @@ const Navbar = () => {
           gap: 4px;
         }
 
-        .mobile-menu.open {
-          display: flex;
-        }
+        .mobile-menu.open { display: flex; }
 
         .mobile-link {
           color: rgba(255,255,255,0.7);
@@ -493,9 +577,7 @@ const Navbar = () => {
           font-family: inherit;
         }
 
-        .mobile-logout:hover {
-          background: rgba(239,68,68,0.1);
-        }
+        .mobile-logout:hover { background: rgba(239,68,68,0.1); }
 
         @media (max-width: 768px) {
           .navbar-links { display: none; }
@@ -515,71 +597,36 @@ const Navbar = () => {
 
           {/* Center Nav Links */}
           <div className='navbar-links'>
-            <Link
-              to='/'
-              className={`nav-link ${isActive('/') ? 'active' : ''}`}
-            >
+            <Link to='/' className={`nav-link ${isActive('/') ? 'active' : ''}`}>
               Home
             </Link>
-            <Link
-              to='/jobs'
-              className={`nav-link ${isActive('/jobs') ? 'active' : ''}`}
-            >
+            <Link to='/jobs' className={`nav-link ${isActive('/jobs') ? 'active' : ''}`}>
               Browse Jobs
             </Link>
             {user?.role === 'employer' && (
-              <>
-                <Link
-                  to='/employer-dashboard'
-                  className={`nav-link ${isActive('/employer-dashboard') ? 'active' : ''}`}
-                >
-                  Dashboard
-                </Link>
-              </>
+              <Link to='/employer-dashboard' className={`nav-link ${isActive('/employer-dashboard') ? 'active' : ''}`}>
+                Dashboard
+              </Link>
             )}
             {user?.role === 'jobseeker' && (
-              <Link
-                to='/my-applications'
-                className={`nav-link ${isActive('/my-applications') ? 'active' : ''}`}
-              >
+              <Link to='/my-applications' className={`nav-link ${isActive('/my-applications') ? 'active' : ''}`}>
                 My Applications
               </Link>
             )}
 
-{/*             <Link
-  to='/ats-checker'
-  className={`nav-link ${isActive('/ats-checker') ? 'active' : ''}`}
-  style={{
-    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    color: 'white',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    fontSize: '13px',
-    fontWeight: '700',
-    boxShadow: '0 4px 12px rgba(99,102,241,0.35)'
-  }}
->
-  ✨ ATS Checker
-</Link> */}
-
-<Link
-  to='/ats-checker'
-  className={`nav-link ats-btn ${isActive('/ats-checker') ? 'active' : ''}`}
->
-  ✨ ATS Checker
-</Link>
-
-
-
-{/* Mobile menu — add inside mobile-menu div */}
-
+            {/* ✨ ATS Checker — Jobseeker only with glow */}
+            {user?.role === 'jobseeker' && (
+              <Link to='/ats-checker' className='ats-btn'>
+                <span className='ats-dot' />
+                <span className='ats-btn-text'>✨ ATS Checker</span>
+              </Link>
+            )}
           </div>
 
           {/* Right Side */}
           <div className='navbar-right'>
             {user ? (
               <>
-                {/* Post Job Button for Employer */}
                 {user.role === 'employer' && (
                   <Link to='/post-job' className='btn-post-job'>
                     + Post Job
@@ -606,11 +653,8 @@ const Navbar = () => {
                     </span>
                   </button>
 
-                  {/* Dropdown Menu */}
                   {dropdownOpen && (
                     <div className='dropdown'>
-
-                      {/* User Info Header */}
                       <div className='dropdown-header'>
                         <div className='dropdown-avatar'>
                           {getInitials(user.name)}
@@ -618,70 +662,50 @@ const Navbar = () => {
                         <div>
                           <div className='dropdown-name'>{user.name}</div>
                           <div className='dropdown-email'>{user.email}</div>
-                          <span className='dropdown-role-badge'>
-                            {user.role}
-                          </span>
+                          <span className='dropdown-role-badge'>{user.role}</span>
                         </div>
                       </div>
 
-                      {/* Menu Items */}
                       <div className='dropdown-section'>
-                        <Link
-                          to='/profile'
-                          className='dropdown-item'
-                          onClick={() => setDropdownOpen(false)}
-                        >
+                        <Link to='/profile' className='dropdown-item' onClick={() => setDropdownOpen(false)}>
                           <span className='dropdown-item-icon'>👤</span>
                           My Profile
                         </Link>
 
                         {user.role === 'jobseeker' && (
-                          <Link
-                            to='/my-applications'
-                            className='dropdown-item'
-                            onClick={() => setDropdownOpen(false)}
-                          >
-                            <span className='dropdown-item-icon'>📋</span>
-                            My Applications
-                          </Link>
+                          <>
+                            <Link to='/my-applications' className='dropdown-item' onClick={() => setDropdownOpen(false)}>
+                              <span className='dropdown-item-icon'>📋</span>
+                              My Applications
+                            </Link>
+                            <Link to='/ats-checker' className='dropdown-item' onClick={() => setDropdownOpen(false)}>
+                              <span className='dropdown-item-icon'>✨</span>
+                              ATS Resume Checker
+                            </Link>
+                          </>
                         )}
 
                         {user.role === 'employer' && (
                           <>
-                            <Link
-                              to='/employer-dashboard'
-                              className='dropdown-item'
-                              onClick={() => setDropdownOpen(false)}
-                            >
+                            <Link to='/employer-dashboard' className='dropdown-item' onClick={() => setDropdownOpen(false)}>
                               <span className='dropdown-item-icon'>📊</span>
                               Dashboard
                             </Link>
-                            <Link
-                              to='/post-job'
-                              className='dropdown-item'
-                              onClick={() => setDropdownOpen(false)}
-                            >
+                            <Link to='/post-job' className='dropdown-item' onClick={() => setDropdownOpen(false)}>
                               <span className='dropdown-item-icon'>➕</span>
                               Post a Job
                             </Link>
                           </>
                         )}
 
-                        <Link
-                          to='/jobs'
-                          className='dropdown-item'
-                          onClick={() => setDropdownOpen(false)}
-                        >
+                        <Link to='/jobs' className='dropdown-item' onClick={() => setDropdownOpen(false)}>
                           <span className='dropdown-item-icon'>🔍</span>
                           Browse Jobs
                         </Link>
 
                         <div className='dropdown-divider' />
 
-                        <button
-                          className='dropdown-item danger'
-                          onClick={handleLogout}
-                        >
+                        <button className='dropdown-item danger' onClick={handleLogout}>
                           <span className='dropdown-item-icon'>🚪</span>
                           Sign Out
                         </button>
@@ -698,50 +722,41 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Hamburger for Mobile */}
-          <button
-            className='hamburger'
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            <span />
-            <span />
-            <span />
+          {/* Hamburger */}
+          <button className='hamburger' onClick={() => setMobileOpen(!mobileOpen)}>
+            <span /><span /><span />
           </button>
         </div>
 
         {/* Mobile Menu */}
         <div className={`mobile-menu ${mobileOpen ? 'open' : ''}`}>
-          <Link to='/' className={`mobile-link ${isActive('/') ? 'active' : ''}`}>
-            🏠 Home
-          </Link>
-          <Link to='/jobs' className={`mobile-link ${isActive('/jobs') ? 'active' : ''}`}>
-            🔍 Browse Jobs
-          </Link>
+          <Link to='/' className={`mobile-link ${isActive('/') ? 'active' : ''}`}>🏠 Home</Link>
+          <Link to='/jobs' className={`mobile-link ${isActive('/jobs') ? 'active' : ''}`}>🔍 Browse Jobs</Link>
 
           {user ? (
             <>
-              <Link to='/profile' className='mobile-link'>
-                👤 My Profile
-              </Link>
+              <Link to='/profile' className='mobile-link'>👤 My Profile</Link>
+
               {user.role === 'jobseeker' && (
-                <Link to='/my-applications' className='mobile-link'>
-                  📋 My Applications
-                </Link>
-              )}
-              {user.role === 'employer' && (
                 <>
-                  <Link to='/employer-dashboard' className='mobile-link'>
-                    📊 Dashboard
-                  </Link>
-                  <Link to='/post-job' className='mobile-link'>
-                    ➕ Post a Job
+                  <Link to='/my-applications' className='mobile-link'>📋 My Applications</Link>
+                  {/* ATS Glow button in mobile */}
+                  <Link to='/ats-checker' className='ats-mobile-btn'>
+                    <span className='ats-dot' />
+                    <span>✨ ATS Checker</span>
                   </Link>
                 </>
               )}
+
+              {user.role === 'employer' && (
+                <>
+                  <Link to='/employer-dashboard' className='mobile-link'>📊 Dashboard</Link>
+                  <Link to='/post-job' className='mobile-link'>➕ Post a Job</Link>
+                </>
+              )}
+
               <div className='mobile-divider' />
-              <button className='mobile-logout' onClick={handleLogout}>
-                🚪 Sign Out
-              </button>
+              <button className='mobile-logout' onClick={handleLogout}>🚪 Sign Out</button>
             </>
           ) : (
             <>

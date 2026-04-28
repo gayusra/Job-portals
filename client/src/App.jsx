@@ -16,6 +16,7 @@ import MyApplications from './pages/MyApplications';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import ATSChecker from './pages/ATSChecker';
+import ResumeBuilder from './pages/ResumeBuilder';
 
 
 function App() {
@@ -31,6 +32,15 @@ function App() {
           <Route path='/jobs' element={<Jobs />} />
           <Route path='/jobs/:id' element={<JobDetail />} />
           <Route path='/ats-checker' element={<ATSChecker />} />
+          <Route
+  path='/resume-builder'
+  element={
+    <ProtectedRoute role='jobseeker'>
+      <ResumeBuilder />
+    </ProtectedRoute>
+  }
+/>
+         
           
        
 

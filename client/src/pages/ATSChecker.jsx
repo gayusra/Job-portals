@@ -76,12 +76,7 @@ Analyze the resume and respond ONLY with a valid JSON object in this exact forma
   const text = data.choices?.[0]?.message?.content;
   if (!text) throw new Error('No response from AI');
 
-  // Clean and parse JSON
-  const cleaned = text
-    .replace(/```json/g, '')
-    .replace(/```/g, '')
-    .trim();
-
+  const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
   return JSON.parse(cleaned);
 };
 
@@ -109,12 +104,7 @@ const ScoreCircle = ({ score }) => {
   return (
     <div style={{ ...scoreStyles.wrapper, backgroundColor: bg }}>
       <svg width='140' height='140' viewBox='0 0 140 140'>
-        <circle
-          cx='70' cy='70' r='54'
-          fill='none'
-          stroke='#e2e8f0'
-          strokeWidth='10'
-        />
+        <circle cx='70' cy='70' r='54' fill='none' stroke='#e2e8f0' strokeWidth='10' />
         <circle
           cx='70' cy='70' r='54'
           fill='none'
@@ -126,29 +116,14 @@ const ScoreCircle = ({ score }) => {
           transform='rotate(-90 70 70)'
           style={{ transition: 'stroke-dashoffset 1.5s ease' }}
         />
-        <text
-          x='70' y='65'
-          textAnchor='middle'
-          fontSize='28'
-          fontWeight='800'
-          fill={color}
-          fontFamily='Plus Jakarta Sans, sans-serif'
-        >
+        <text x='70' y='65' textAnchor='middle' fontSize='28' fontWeight='800' fill={color} fontFamily='Plus Jakarta Sans, sans-serif'>
           {score}
         </text>
-        <text
-          x='70' y='84'
-          textAnchor='middle'
-          fontSize='11'
-          fill='#64748b'
-          fontFamily='Plus Jakarta Sans, sans-serif'
-        >
+        <text x='70' y='84' textAnchor='middle' fontSize='11' fill='#64748b' fontFamily='Plus Jakarta Sans, sans-serif'>
           out of 100
         </text>
       </svg>
-      <div style={{ ...scoreStyles.label, color }}>
-        {label}
-      </div>
+      <div style={{ ...scoreStyles.label, color }}>{label}</div>
       <div style={scoreStyles.sublabel}>ATS Score</div>
     </div>
   );
@@ -163,15 +138,8 @@ const scoreStyles = {
     borderRadius: '20px',
     gap: '8px'
   },
-  label: {
-    fontSize: '20px',
-    fontWeight: '800'
-  },
-  sublabel: {
-    fontSize: '13px',
-    color: '#64748b',
-    fontWeight: '500'
-  }
+  label: { fontSize: '20px', fontWeight: '800' },
+  sublabel: { fontSize: '13px', color: '#64748b', fontWeight: '500' }
 };
 
 // ── Mini Score Bar ────────────────────────────────────────
@@ -201,30 +169,11 @@ const ScoreBar = ({ label, value }) => {
 
 const barStyles = {
   wrapper: { marginBottom: '12px' },
-  top: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginBottom: '6px'
-  },
-  label: {
-    fontSize: '13px',
-    fontWeight: '600',
-    color: '#374151'
-  },
-  value: {
-    fontSize: '13px',
-    fontWeight: '700'
-  },
-  track: {
-    height: '8px',
-    backgroundColor: '#f1f5f9',
-    borderRadius: '10px',
-    overflow: 'hidden'
-  },
-  fill: {
-    height: '100%',
-    borderRadius: '10px'
-  }
+  top: { display: 'flex', justifyContent: 'space-between', marginBottom: '6px' },
+  label: { fontSize: '13px', fontWeight: '600', color: '#374151' },
+  value: { fontSize: '13px', fontWeight: '700' },
+  track: { height: '8px', backgroundColor: '#f1f5f9', borderRadius: '10px', overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: '10px' }
 };
 
 // ── Main Component ────────────────────────────────────────
@@ -238,7 +187,8 @@ const ATSChecker = () => {
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
-  const [step, setStep] = useState('upload'); // upload | analyzing | result
+  const [resumeText, setResumeText] = useState(''); // ← stores extracted text
+  const [step, setStep] = useState('upload');
 
   if (!user) {
     return (
@@ -246,13 +196,8 @@ const ATSChecker = () => {
         <div style={styles.loginCard}>
           <div style={{ fontSize: '52px', marginBottom: '16px' }}>🔒</div>
           <h2 style={styles.loginTitle}>Login Required</h2>
-          <p style={styles.loginText}>
-            Please login to use the ATS Resume Checker
-          </p>
-          <button
-            onClick={() => navigate('/login')}
-            style={styles.loginBtn}
-          >
+          <p style={styles.loginText}>Please login to use the ATS Resume Checker</p>
+          <button onClick={() => navigate('/login')} style={styles.loginBtn}>
             Login to Continue →
           </button>
         </div>
@@ -263,7 +208,6 @@ const ATSChecker = () => {
   const handleFileChange = (e) => {
     const f = e.target.files[0];
     if (!f) return;
-
     if (f.type !== 'application/pdf') {
       toast.error('Only PDF files are allowed');
       return;
@@ -272,7 +216,6 @@ const ATSChecker = () => {
       toast.error('File size must be less than 5MB');
       return;
     }
-
     setFile(f);
     setFileName(f.name);
     setResult(null);
@@ -288,7 +231,6 @@ const ATSChecker = () => {
     setUploading(true);
 
     try {
-      // Step 1 — Extract text from PDF via backend
       const formData = new FormData();
       formData.append('resume', file);
 
@@ -296,10 +238,12 @@ const ATSChecker = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
+      // ← Save extracted resume text for Resume Builder
+      setResumeText(data.resumeText);
+
       setUploading(false);
       setAnalyzing(true);
 
-      // Step 2 — Analyze with Groq AI
       const aiResult = await analyzeWithAI(data.resumeText, jobDescription);
 
       setResult({
@@ -325,7 +269,22 @@ const ATSChecker = () => {
     setFileName('');
     setJobDescription('');
     setResult(null);
+    setResumeText('');
     setStep('upload');
+  };
+
+  // ← Navigate to Resume Builder with all data
+  const handleBuildResume = () => {
+    navigate('/resume-builder', {
+      state: {
+        resumeText,
+        atsScore: result.atsScore,
+        improvements: result.improvements,
+        suggestedSkills: result.suggestedSkills,
+        keywordsMissing: result.keywordsMissing,
+        jobTitle: ''
+      }
+    });
   };
 
   return (
@@ -346,44 +305,44 @@ const ATSChecker = () => {
           60% { width: 70%; }
           90% { width: 90%; }
         }
-
-        .upload-zone {
-          transition: all 0.3s;
-          cursor: pointer;
+        @keyframes buildGlow {
+          0%,100% { box-shadow: 0 4px 20px rgba(99,102,241,0.4); }
+          50% { box-shadow: 0 8px 35px rgba(99,102,241,0.7); }
         }
+
+        .upload-zone { transition: all 0.3s; cursor: pointer; }
         .upload-zone:hover {
           border-color: #6366f1 !important;
           background: #f5f3ff !important;
           transform: scale(1.01);
         }
 
-        .analyze-btn {
-          transition: all 0.3s;
-        }
+        .analyze-btn { transition: all 0.3s; }
         .analyze-btn:hover:not(:disabled) {
           transform: translateY(-3px);
           box-shadow: 0 12px 30px rgba(99,102,241,0.4) !important;
         }
-        .analyze-btn:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
+        .analyze-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        .result-card {
-          animation: fadeInUp 0.5s ease both;
-        }
+        .result-card { animation: fadeInUp 0.5s ease both; }
 
-        .tag-skill {
-          transition: all 0.2s;
+        .tag-skill { transition: all 0.2s; }
+        .tag-skill:hover { transform: scale(1.05); }
+
+        .build-resume-btn {
+          transition: all 0.3s;
+          animation: buildGlow 2.5s ease-in-out infinite;
         }
-        .tag-skill:hover {
-          transform: scale(1.05);
+        .build-resume-btn:hover {
+          transform: translateY(-3px) scale(1.03);
+          animation: none;
+          box-shadow: 0 12px 40px rgba(99,102,241,0.6) !important;
         }
       `}</style>
 
       <div style={styles.container} className='ats-page'>
 
-        {/* Hero Header */}
+        {/* Hero */}
         <div style={styles.hero}>
           <div style={styles.heroBadge}>✨ AI Powered</div>
           <h1 style={styles.heroTitle}>ATS Resume Checker</h1>
@@ -409,17 +368,10 @@ const ATSChecker = () => {
         {/* Upload Section */}
         {step === 'upload' && (
           <div style={styles.uploadSection}>
-
-            {/* Upload Card */}
             <div style={styles.card}>
-              <h2 style={styles.cardTitle}>
-                📄 Upload Your Resume
-              </h2>
-              <p style={styles.cardSubtitle}>
-                PDF format only — max 5MB
-              </p>
+              <h2 style={styles.cardTitle}>📄 Upload Your Resume</h2>
+              <p style={styles.cardSubtitle}>PDF format only — max 5MB</p>
 
-              {/* Drop Zone */}
               <input
                 type='file'
                 accept='.pdf'
@@ -440,25 +392,18 @@ const ATSChecker = () => {
                     <>
                       <div style={styles.uploadIcon}>✅</div>
                       <div style={styles.uploadedName}>{fileName}</div>
-                      <div style={styles.uploadedSub}>
-                        Click to change file
-                      </div>
+                      <div style={styles.uploadedSub}>Click to change file</div>
                     </>
                   ) : (
                     <>
                       <div style={styles.uploadIcon}>📄</div>
-                      <div style={styles.uploadTitle}>
-                        Click to upload your resume
-                      </div>
-                      <div style={styles.uploadSub}>
-                        PDF files only — max 5MB
-                      </div>
+                      <div style={styles.uploadTitle}>Click to upload your resume</div>
+                      <div style={styles.uploadSub}>PDF files only — max 5MB</div>
                     </>
                   )}
                 </div>
               </label>
 
-              {/* Job Description */}
               <div style={styles.jdSection}>
                 <label style={styles.jdLabel}>
                   🎯 Target Job Description
@@ -476,20 +421,16 @@ const ATSChecker = () => {
                 </p>
               </div>
 
-              {/* Analyze Button */}
               <button
                 onClick={handleAnalyze}
                 disabled={!file}
                 style={styles.analyzeBtn}
                 className='analyze-btn'
               >
-                {!file
-                  ? '📄 Upload Resume First'
-                  : '🔍 Analyze My Resume with AI'}
+                {!file ? '📄 Upload Resume First' : '🔍 Analyze My Resume with AI'}
               </button>
             </div>
 
-            {/* How It Works */}
             <div style={styles.howCard}>
               <h3 style={styles.howTitle}>How It Works</h3>
               <div style={styles.steps}>
@@ -497,7 +438,7 @@ const ATSChecker = () => {
                   { icon: '📄', step: '01', title: 'Upload PDF', desc: 'Upload your resume in PDF format' },
                   { icon: '🤖', step: '02', title: 'AI Analyzes', desc: 'Groq AI reads and scores your resume' },
                   { icon: '📊', step: '03', title: 'Get Score', desc: 'Receive ATS score out of 100' },
-                  { icon: '💡', step: '04', title: 'Improve', desc: 'Follow suggestions to improve your resume' }
+                  { icon: '🚀', step: '04', title: 'Build Resume', desc: 'AI builds an optimized new resume' }
                 ].map((s, i) => (
                   <div key={i} style={styles.howStep}>
                     <div style={styles.howStepNum}>{s.step}</div>
@@ -516,37 +457,23 @@ const ATSChecker = () => {
           <div style={styles.analyzingWrapper}>
             <div style={styles.analyzingCard}>
               <div style={{ fontSize: '52px', marginBottom: '20px' }}>🤖</div>
-
               <div style={{
-                width: '64px',
-                height: '64px',
+                width: '64px', height: '64px',
                 border: '5px solid #eef2ff',
                 borderTopColor: '#6366f1',
                 borderRadius: '50%',
                 animation: 'spin 0.8s linear infinite',
                 margin: '0 auto 24px'
               }} />
-
               <h2 style={styles.analyzingTitle}>
-                {uploading
-                  ? 'Extracting resume text...'
-                  : 'AI is analyzing your resume...'}
+                {uploading ? 'Extracting resume text...' : 'AI is analyzing your resume...'}
               </h2>
               <p style={styles.analyzingSubtitle}>
-                {uploading
-                  ? 'Reading your PDF file'
-                  : 'Checking ATS compatibility, keywords, formatting & more'}
+                {uploading ? 'Reading your PDF file' : 'Checking ATS compatibility, keywords, formatting & more'}
               </p>
-
-              {/* Progress Bar */}
               <div style={styles.progressTrack}>
-                <div
-                  style={styles.progressFill}
-                  className='progress-fill'
-                />
+                <div style={styles.progressFill} className='progress-fill' />
               </div>
-
-              {/* Steps */}
               <div style={styles.analyzingSteps}>
                 {[
                   { icon: '📄', label: 'Reading PDF', done: !uploading },
@@ -579,10 +506,8 @@ const ATSChecker = () => {
         {step === 'result' && result && (
           <div style={styles.resultsSection}>
 
-            {/* Top Row — Score + Breakdown */}
+            {/* Top Row */}
             <div style={styles.topRow}>
-
-              {/* ATS Score */}
               <div style={{ ...styles.card, textAlign: 'center' }} className='result-card'>
                 <h3 style={styles.cardTitle}>Your ATS Score</h3>
                 <ScoreCircle score={result.atsScore} />
@@ -596,14 +521,11 @@ const ATSChecker = () => {
                     <span style={styles.resumeStatLabel}>Words</span>
                   </div>
                 </div>
-
-                {/* Reanalyze Button */}
                 <button onClick={handleReset} style={styles.resetBtn}>
                   🔄 Check Another Resume
                 </button>
               </div>
 
-              {/* Score Breakdown */}
               <div style={{ ...styles.card, flex: '2' }} className='result-card'>
                 <h3 style={styles.cardTitle}>📊 Score Breakdown</h3>
                 {result.scoreBreakdown && Object.entries(result.scoreBreakdown).map(([key, val]) => (
@@ -613,20 +535,14 @@ const ATSChecker = () => {
                     value={val}
                   />
                 ))}
-
-                {/* Overall Feedback */}
                 <div style={styles.feedbackBox}>
-                  <p style={styles.feedbackText}>
-                    💬 {result.overallFeedback}
-                  </p>
+                  <p style={styles.feedbackText}>💬 {result.overallFeedback}</p>
                 </div>
               </div>
             </div>
 
-            {/* Good Points & Missing Sections */}
+            {/* Good & Missing */}
             <div style={styles.midRow}>
-
-              {/* Good Points */}
               <div style={styles.card} className='result-card'>
                 <h3 style={styles.cardTitle}>✅ What's Good</h3>
                 {result.goodPoints?.map((point, i) => (
@@ -636,8 +552,6 @@ const ATSChecker = () => {
                   </div>
                 ))}
               </div>
-
-              {/* Missing Sections */}
               <div style={styles.card} className='result-card'>
                 <h3 style={styles.cardTitle}>❌ What's Missing</h3>
                 {result.missingSection?.map((item, i) => (
@@ -651,27 +565,19 @@ const ATSChecker = () => {
 
             {/* Keywords */}
             <div style={styles.midRow}>
-
-              {/* Keywords Found */}
               <div style={styles.card} className='result-card'>
                 <h3 style={styles.cardTitle}>🔑 Keywords Found</h3>
                 <div style={styles.tagsWrapper}>
                   {result.keywordsFound?.map((kw, i) => (
-                    <span key={i} style={styles.foundTag} className='tag-skill'>
-                      ✓ {kw}
-                    </span>
+                    <span key={i} style={styles.foundTag} className='tag-skill'>✓ {kw}</span>
                   ))}
                 </div>
               </div>
-
-              {/* Keywords Missing */}
               <div style={styles.card} className='result-card'>
                 <h3 style={styles.cardTitle}>🔍 Keywords Missing</h3>
                 <div style={styles.tagsWrapper}>
                   {result.keywordsMissing?.map((kw, i) => (
-                    <span key={i} style={styles.missingTag} className='tag-skill'>
-                      + {kw}
-                    </span>
+                    <span key={i} style={styles.missingTag} className='tag-skill'>+ {kw}</span>
                   ))}
                 </div>
               </div>
@@ -685,14 +591,12 @@ const ATSChecker = () => {
               </p>
               <div style={styles.tagsWrapper}>
                 {result.suggestedSkills?.map((skill, i) => (
-                  <span key={i} style={styles.skillTag} className='tag-skill'>
-                    ⚡ {skill}
-                  </span>
+                  <span key={i} style={styles.skillTag} className='tag-skill'>⚡ {skill}</span>
                 ))}
               </div>
             </div>
 
-            {/* Improvement Suggestions */}
+            {/* Improvements */}
             <div style={styles.card} className='result-card'>
               <h3 style={styles.cardTitle}>📝 Improvement Suggestions</h3>
               <p style={styles.cardSubtitle}>
@@ -712,17 +616,61 @@ const ATSChecker = () => {
               ))}
             </div>
 
+            {/* ── BUILD RESUME CTA ── */}
+            <div style={styles.buildResumeCard} className='result-card'>
+              <div style={styles.buildResumeLeft}>
+                <div style={styles.buildResumeIconBox}>🚀</div>
+                <div>
+                  <h3 style={styles.buildResumeTitle}>
+                    Build a New ATS Optimized Resume
+                  </h3>
+                  <p style={styles.buildResumeSubtitle}>
+                    AI will create a brand new resume using your feedback,
+                    missing keywords and suggested skills — ready to download as PDF
+                  </p>
+                  <div style={styles.buildResumeFeatures}>
+                    {[
+                      `🔑 Add ${result.keywordsMissing?.length || 0} missing keywords`,
+                      `⚡ Add ${result.suggestedSkills?.length || 0} suggested skills`,
+                      `📈 Fix ${result.improvements?.length || 0} improvements`,
+                      `🎯 Score: ${result.atsScore} → 85-95`
+                    ].map((f, i) => (
+                      <span key={i} style={styles.buildResumeFeature}>{f}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div style={styles.buildResumeRight}>
+                <button
+                  onClick={handleBuildResume}
+                  style={styles.buildResumeBtn}
+                  className='build-resume-btn'
+                >
+                  🚀 Build ATS Resume
+                </button>
+                <div style={styles.buildResumeNote}>
+                  Free • AI Powered • Download PDF
+                </div>
+              </div>
+            </div>
+
             {/* Bottom CTA */}
             <div style={styles.ctaCard}>
               <div style={styles.ctaLeft}>
-                <h3 style={styles.ctaTitle}>Ready to Apply?</h3>
+                <h3 style={styles.ctaTitle}>What's Next?</h3>
                 <p style={styles.ctaText}>
-                  Browse jobs that match your improved resume
+                  Build an optimized resume or browse matching jobs
                 </p>
               </div>
               <div style={styles.ctaButtons}>
+                <button
+                  onClick={handleBuildResume}
+                  style={styles.ctaBuildBtn}
+                >
+                  🚀 Build ATS Resume
+                </button>
                 <button onClick={handleReset} style={styles.ctaSecBtn}>
-                  🔄 Check Another Resume
+                  🔄 Check Another
                 </button>
                 <a href='/jobs' style={styles.ctaPriBtn}>
                   Browse Jobs →
@@ -736,7 +684,6 @@ const ATSChecker = () => {
   );
 };
 
-// ── Styles ────────────────────────────────────────────────
 const styles = {
   page: {
     backgroundColor: '#f8faff',
@@ -748,10 +695,7 @@ const styles = {
     margin: '0 auto',
     padding: '36px 24px 60px'
   },
-  hero: {
-    textAlign: 'center',
-    marginBottom: '36px'
-  },
+  hero: { textAlign: 'center', marginBottom: '36px' },
   heroBadge: {
     display: 'inline-block',
     background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
@@ -794,14 +738,8 @@ const styles = {
     fontWeight: '600',
     color: '#374151'
   },
-  heroStatLabel: {
-    color: '#374151'
-  },
-  uploadSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px'
-  },
+  heroStatLabel: { color: '#374151' },
+  uploadSection: { display: 'flex', flexDirection: 'column', gap: '24px' },
   card: {
     background: 'white',
     borderRadius: '20px',
@@ -809,17 +747,8 @@ const styles = {
     boxShadow: '0 4px 20px rgba(99,102,241,0.07)',
     border: '1px solid #e2e8f0'
   },
-  cardTitle: {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: '6px'
-  },
-  cardSubtitle: {
-    fontSize: '13px',
-    color: '#64748b',
-    marginBottom: '20px'
-  },
+  cardTitle: { fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' },
+  cardSubtitle: { fontSize: '13px', color: '#64748b', marginBottom: '20px' },
   uploadZone: {
     border: '2px dashed',
     borderRadius: '14px',
@@ -829,45 +758,14 @@ const styles = {
     marginBottom: '20px',
     display: 'block'
   },
-  uploadIcon: {
-    fontSize: '48px',
-    marginBottom: '12px'
-  },
-  uploadTitle: {
-    fontSize: '16px',
-    fontWeight: '700',
-    color: '#374151',
-    marginBottom: '6px'
-  },
-  uploadSub: {
-    fontSize: '13px',
-    color: '#94a3b8'
-  },
-  uploadedName: {
-    fontSize: '15px',
-    fontWeight: '700',
-    color: '#6366f1',
-    marginBottom: '6px'
-  },
-  uploadedSub: {
-    fontSize: '13px',
-    color: '#94a3b8'
-  },
-  jdSection: {
-    marginBottom: '20px'
-  },
-  jdLabel: {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: '700',
-    color: '#374151',
-    marginBottom: '8px'
-  },
-  optional: {
-    color: '#94a3b8',
-    fontWeight: '400',
-    fontSize: '13px'
-  },
+  uploadIcon: { fontSize: '48px', marginBottom: '12px' },
+  uploadTitle: { fontSize: '16px', fontWeight: '700', color: '#374151', marginBottom: '6px' },
+  uploadSub: { fontSize: '13px', color: '#94a3b8' },
+  uploadedName: { fontSize: '15px', fontWeight: '700', color: '#6366f1', marginBottom: '6px' },
+  uploadedSub: { fontSize: '13px', color: '#94a3b8' },
+  jdSection: { marginBottom: '20px' },
+  jdLabel: { display: 'block', fontSize: '14px', fontWeight: '700', color: '#374151', marginBottom: '8px' },
+  optional: { color: '#94a3b8', fontWeight: '400', fontSize: '13px' },
   jdTextarea: {
     width: '100%',
     padding: '12px 14px',
@@ -880,11 +778,7 @@ const styles = {
     color: '#374151',
     fontFamily: 'inherit'
   },
-  jdHint: {
-    fontSize: '12px',
-    color: '#94a3b8',
-    marginTop: '6px'
-  },
+  jdHint: { fontSize: '12px', color: '#94a3b8', marginTop: '6px' },
   analyzeBtn: {
     width: '100%',
     padding: '16px',
@@ -905,19 +799,8 @@ const styles = {
     boxShadow: '0 4px 20px rgba(99,102,241,0.07)',
     border: '1px solid #e2e8f0'
   },
-  howTitle: {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: '20px',
-    textAlign: 'center'
-  },
-  steps: {
-    display: 'flex',
-    gap: '16px',
-    justifyContent: 'center',
-    flexWrap: 'wrap'
-  },
+  howTitle: { fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '20px', textAlign: 'center' },
+  steps: { display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' },
   howStep: {
     flex: '1',
     minWidth: '160px',
@@ -927,33 +810,11 @@ const styles = {
     borderRadius: '14px',
     border: '1px solid #e2e8f0'
   },
-  howStepNum: {
-    fontSize: '12px',
-    fontWeight: '800',
-    color: '#6366f1',
-    marginBottom: '8px'
-  },
-  howStepIcon: {
-    fontSize: '32px',
-    marginBottom: '10px'
-  },
-  howStepTitle: {
-    fontSize: '14px',
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: '6px'
-  },
-  howStepDesc: {
-    fontSize: '12px',
-    color: '#64748b',
-    lineHeight: '1.5'
-  },
-  analyzingWrapper: {
-    minHeight: '60vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
+  howStepNum: { fontSize: '12px', fontWeight: '800', color: '#6366f1', marginBottom: '8px' },
+  howStepIcon: { fontSize: '32px', marginBottom: '10px' },
+  howStepTitle: { fontSize: '14px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' },
+  howStepDesc: { fontSize: '12px', color: '#64748b', lineHeight: '1.5' },
+  analyzingWrapper: { minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   analyzingCard: {
     background: 'white',
     borderRadius: '24px',
@@ -964,17 +825,8 @@ const styles = {
     maxWidth: '460px',
     width: '100%'
   },
-  analyzingTitle: {
-    fontSize: '22px',
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: '8px'
-  },
-  analyzingSubtitle: {
-    color: '#64748b',
-    fontSize: '14px',
-    marginBottom: '28px'
-  },
+  analyzingTitle: { fontSize: '22px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' },
+  analyzingSubtitle: { color: '#64748b', fontSize: '14px', marginBottom: '28px' },
   progressTrack: {
     height: '6px',
     backgroundColor: '#eef2ff',
@@ -988,12 +840,7 @@ const styles = {
     borderRadius: '10px',
     animation: 'progressBar 4s ease-in-out infinite'
   },
-  analyzingSteps: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    textAlign: 'left'
-  },
+  analyzingSteps: { display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left' },
   analyzingStep: {
     display: 'flex',
     alignItems: 'center',
@@ -1002,51 +849,15 @@ const styles = {
     background: '#f8faff',
     borderRadius: '10px'
   },
-  analyzingStepIcon: {
-    fontSize: '18px'
-  },
-  analyzingStepLabel: {
-    fontSize: '14px',
-    fontWeight: '500'
-  },
-  resultsSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px'
-  },
-  topRow: {
-    display: 'flex',
-    gap: '20px',
-    flexWrap: 'wrap',
-    alignItems: 'flex-start'
-  },
-  midRow: {
-    display: 'flex',
-    gap: '20px',
-    flexWrap: 'wrap'
-  },
-  resumeStats: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '24px',
-    margin: '16px 0'
-  },
-  resumeStat: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px'
-  },
-  resumeStatVal: {
-    fontSize: '22px',
-    fontWeight: '800',
-    color: '#6366f1'
-  },
-  resumeStatLabel: {
-    fontSize: '12px',
-    color: '#64748b',
-    fontWeight: '500'
-  },
+  analyzingStepIcon: { fontSize: '18px' },
+  analyzingStepLabel: { fontSize: '14px', fontWeight: '500' },
+  resultsSection: { display: 'flex', flexDirection: 'column', gap: '20px' },
+  topRow: { display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-start' },
+  midRow: { display: 'flex', gap: '20px', flexWrap: 'wrap' },
+  resumeStats: { display: 'flex', justifyContent: 'center', gap: '24px', margin: '16px 0' },
+  resumeStat: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' },
+  resumeStatVal: { fontSize: '22px', fontWeight: '800', color: '#6366f1' },
+  resumeStatLabel: { fontSize: '12px', color: '#64748b', fontWeight: '500' },
   resetBtn: {
     width: '100%',
     padding: '11px',
@@ -1067,11 +878,7 @@ const styles = {
     padding: '14px',
     marginTop: '16px'
   },
-  feedbackText: {
-    color: '#374151',
-    fontSize: '14px',
-    lineHeight: '1.6'
-  },
+  feedbackText: { color: '#374151', fontSize: '14px', lineHeight: '1.6' },
   goodPoint: {
     display: 'flex',
     alignItems: 'flex-start',
@@ -1079,17 +886,8 @@ const styles = {
     padding: '10px 0',
     borderBottom: '1px solid #f1f5f9'
   },
-  goodIcon: {
-    color: '#16a34a',
-    fontWeight: '800',
-    fontSize: '16px',
-    flexShrink: 0
-  },
-  goodText: {
-    color: '#374151',
-    fontSize: '14px',
-    lineHeight: '1.5'
-  },
+  goodIcon: { color: '#16a34a', fontWeight: '800', fontSize: '16px', flexShrink: 0 },
+  goodText: { color: '#374151', fontSize: '14px', lineHeight: '1.5' },
   missingPoint: {
     display: 'flex',
     alignItems: 'flex-start',
@@ -1097,23 +895,9 @@ const styles = {
     padding: '10px 0',
     borderBottom: '1px solid #f1f5f9'
   },
-  missingIcon: {
-    color: '#ef4444',
-    fontWeight: '800',
-    fontSize: '16px',
-    flexShrink: 0
-  },
-  missingText: {
-    color: '#374151',
-    fontSize: '14px',
-    lineHeight: '1.5'
-  },
-  tagsWrapper: {
-    display: 'flex',
-    gap: '8px',
-    flexWrap: 'wrap',
-    marginTop: '8px'
-  },
+  missingIcon: { color: '#ef4444', fontWeight: '800', fontSize: '16px', flexShrink: 0 },
+  missingText: { color: '#374151', fontSize: '14px', lineHeight: '1.5' },
+  tagsWrapper: { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' },
   foundTag: {
     background: '#f0fdf4',
     color: '#16a34a',
@@ -1156,11 +940,7 @@ const styles = {
     flexWrap: 'wrap',
     gap: '8px'
   },
-  impSection: {
-    fontSize: '14px',
-    fontWeight: '800',
-    color: '#0f172a'
-  },
+  impSection: { fontSize: '14px', fontWeight: '800', color: '#0f172a' },
   impIssueBadge: {
     background: '#fffbeb',
     color: '#b45309',
@@ -1170,20 +950,94 @@ const styles = {
     fontSize: '12px',
     fontWeight: '600'
   },
-  impSuggestion: {
+  impSuggestion: { display: 'flex', gap: '10px', alignItems: 'flex-start' },
+  impSugIcon: { fontSize: '16px', flexShrink: 0 },
+  impSugText: { color: '#374151', fontSize: '13px', lineHeight: '1.6' },
+
+  // ── Build Resume Card ──
+  buildResumeCard: {
+    background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #1a1040 100%)',
+    borderRadius: '20px',
+    padding: '32px',
     display: 'flex',
-    gap: '10px',
-    alignItems: 'flex-start'
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '24px',
+    flexWrap: 'wrap',
+    border: '1px solid rgba(99,102,241,0.3)',
+    boxShadow: '0 8px 40px rgba(99,102,241,0.2)'
   },
-  impSugIcon: {
-    fontSize: '16px',
-    flexShrink: 0
+  buildResumeLeft: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '20px',
+    flex: '1'
   },
-  impSugText: {
-    color: '#374151',
+  buildResumeIconBox: {
+    width: '56px',
+    height: '56px',
+    borderRadius: '14px',
+    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '26px',
+    flexShrink: 0,
+    boxShadow: '0 4px 15px rgba(99,102,241,0.4)'
+  },
+  buildResumeTitle: {
+    fontSize: '20px',
+    fontWeight: '800',
+    color: 'white',
+    marginBottom: '8px',
+    letterSpacing: '-0.3px'
+  },
+  buildResumeSubtitle: {
+    color: 'rgba(255,255,255,0.55)',
     fontSize: '13px',
-    lineHeight: '1.6'
+    lineHeight: '1.6',
+    marginBottom: '14px'
   },
+  buildResumeFeatures: {
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap'
+  },
+  buildResumeFeature: {
+    background: 'rgba(255,255,255,0.08)',
+    color: 'rgba(255,255,255,0.7)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    fontWeight: '600'
+  },
+  buildResumeRight: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '10px'
+  },
+  buildResumeBtn: {
+    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    color: 'white',
+    border: 'none',
+    padding: '15px 32px',
+    borderRadius: '12px',
+    fontSize: '16px',
+    fontWeight: '800',
+    cursor: 'pointer',
+    boxShadow: '0 6px 25px rgba(99,102,241,0.5)',
+    fontFamily: 'inherit',
+    whiteSpace: 'nowrap'
+  },
+  buildResumeNote: {
+    fontSize: '12px',
+    color: 'rgba(255,255,255,0.35)',
+    fontWeight: '500'
+  },
+
+  // Bottom CTA
   ctaCard: {
     background: 'linear-gradient(135deg, #0a0f1e, #1a1040)',
     borderRadius: '20px',
@@ -1195,20 +1049,20 @@ const styles = {
     gap: '20px'
   },
   ctaLeft: {},
-  ctaTitle: {
-    fontSize: '20px',
-    fontWeight: '800',
+  ctaTitle: { fontSize: '20px', fontWeight: '800', color: 'white', marginBottom: '6px' },
+  ctaText: { color: 'rgba(255,255,255,0.55)', fontSize: '14px' },
+  ctaButtons: { display: 'flex', gap: '12px', flexWrap: 'wrap' },
+  ctaBuildBtn: {
+    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
     color: 'white',
-    marginBottom: '6px'
-  },
-  ctaText: {
-    color: 'rgba(255,255,255,0.55)',
-    fontSize: '14px'
-  },
-  ctaButtons: {
-    display: 'flex',
-    gap: '12px',
-    flexWrap: 'wrap'
+    border: 'none',
+    padding: '11px 22px',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    boxShadow: '0 4px 15px rgba(99,102,241,0.4)'
   },
   ctaSecBtn: {
     background: 'rgba(255,255,255,0.1)',
@@ -1222,20 +1076,15 @@ const styles = {
     fontFamily: 'inherit'
   },
   ctaPriBtn: {
-    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    background: 'linear-gradient(135deg, #10b981, #059669)',
     color: 'white',
     padding: '11px 24px',
     borderRadius: '10px',
     fontSize: '14px',
     fontWeight: '700',
-    boxShadow: '0 4px 15px rgba(99,102,241,0.4)'
+    boxShadow: '0 4px 15px rgba(16,185,129,0.4)'
   },
-  loginPrompt: {
-    minHeight: '80vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
+  loginPrompt: { minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   loginCard: {
     background: 'white',
     borderRadius: '24px',
@@ -1245,17 +1094,8 @@ const styles = {
     border: '1px solid #e2e8f0',
     maxWidth: '380px'
   },
-  loginTitle: {
-    fontSize: '24px',
-    fontWeight: '800',
-    color: '#0f172a',
-    marginBottom: '12px'
-  },
-  loginText: {
-    color: '#64748b',
-    marginBottom: '28px',
-    fontSize: '15px'
-  },
+  loginTitle: { fontSize: '24px', fontWeight: '800', color: '#0f172a', marginBottom: '12px' },
+  loginText: { color: '#64748b', marginBottom: '28px', fontSize: '15px' },
   loginBtn: {
     background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
     color: 'white',
