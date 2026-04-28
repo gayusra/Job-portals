@@ -369,6 +369,59 @@ const Navbar = () => {
           box-shadow: 0 6px 20px rgba(16,185,129,0.35);
         }
 
+        .ats-btn {
+  background: linear-gradient(135deg, #ff6a00, #ee0979); /* orange → pink */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(238, 9, 121, 0.6);
+}
+
+/* Glow pulse animation */
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 10px rgba(255,106,0,0.6); }
+  50% { box-shadow: 0 0 25px rgba(238,9,121,1); }
+  100% { box-shadow: 0 0 10px rgba(255,106,0,0.6); }
+}
+
+.ats-btn {
+  animation: glowPulse 2s infinite;
+}
+
+/* Shine effect */
+.ats-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.5),
+    transparent
+  );
+  transform: skewX(-20deg);
+  animation: shineMove 3s infinite;
+}
+
+@keyframes shineMove {
+  0% { left: -75%; }
+  100% { left: 130%; }
+}
+
+/* Hover effect */
+.ats-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: linear-gradient(135deg, #ff512f, #dd2476);
+}
+
         /* Mobile hamburger */
         .hamburger {
           display: none;
@@ -493,7 +546,7 @@ const Navbar = () => {
               </Link>
             )}
 
-            <Link
+{/*             <Link
   to='/ats-checker'
   className={`nav-link ${isActive('/ats-checker') ? 'active' : ''}`}
   style={{
@@ -507,7 +560,16 @@ const Navbar = () => {
   }}
 >
   ✨ ATS Checker
+</Link> */}
+
+<Link
+  to='/ats-checker'
+  className={`nav-link ats-btn ${isActive('/ats-checker') ? 'active' : ''}`}
+>
+  ✨ ATS Checker
 </Link>
+
+
 
 {/* Mobile menu — add inside mobile-menu div */}
 
