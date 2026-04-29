@@ -124,7 +124,8 @@ Instructions:
 };
 
 // ── ATS Resume Builder ────────────────────────────────────
-export const buildATSResume = async ({
+/* export const buildATSResume = async ({
+
   resumeText,
   atsScore,
   improvements,
@@ -227,6 +228,142 @@ IMPORTANT RULES:
     if (!text) throw new Error('No response from AI');
 
     // Clean and parse JSON safely
+    const cleaned = text
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.error('Groq error:', error.message);
+    throw new Error(error.message || 'Failed to build resume');
+  }
+}; */
+
+// ── ATS Resume Builder ────────────────────────────────────
+export const buildATSResume = async ({
+  resumeText,
+  atsScore,
+  improvements,
+  suggestedSkills,
+  keywordsMissing,
+  jobTitle
+}) => {
+  if (!GROQ_API_KEY) throw new Error('Groq API key is missing');
+
+  const prompt = `You are a world-class professional resume writer with 15 years of experience. You specialize in writing ATS-optimized resumes that get candidates hired at top tech companies.
+
+EXISTING RESUME CONTENT TO IMPROVE:
+${resumeText}
+
+ATS ANALYSIS:
+- Current ATS Score: ${atsScore}/100
+- Missing Keywords to ADD: ${keywordsMissing?.join(', ') || 'None'}
+- Suggested Skills: ${suggestedSkills?.join(', ') || 'None'}
+- Issues to Fix: ${improvements?.map(i => i.issue).join(', ') || 'None'}
+${jobTitle ? `- Target Job: ${jobTitle}` : ''}
+
+STRICT RULES YOU MUST FOLLOW:
+1. PROJECTS: Write 3-4 detailed bullet points per project with:
+   - Specific technologies used
+   - Quantified impact (%, numbers, time saved)
+   - Technical challenges solved
+   - Business value delivered
+   Example: "Built a real-time weather app using React.js and OpenWeatherMap API with Redux state management, achieving 95% uptime and 2-second load time for 500+ daily users"
+
+2. EXPERIENCE: Each bullet point must have:
+   - Strong action verb (Architected, Engineered, Optimized, Delivered)
+   - Technical detail
+   - Measurable result with specific numbers
+   Example: "Architected RESTful APIs using Node.js and Express.js reducing response time by 45% serving 10,000+ daily requests"
+
+3. SKILLS: Organize naturally into Technical/Tools/Soft Skills — do NOT randomly insert keywords
+
+4. SUMMARY: Write 3 powerful sentences with job title, years of experience, key technologies and measurable achievements
+
+5. KEYWORDS: Naturally embed ALL missing keywords throughout the content — never add them as standalone items
+
+6. EDUCATION: Keep original education details exactly as provided
+
+7. QUALITY STANDARD: Every bullet point must be interview-ready and impressive
+
+Respond ONLY with valid JSON, no markdown, no extra text:
+
+{
+  "name": "Full Name from resume",
+  "email": "email from resume or professional@email.com",
+  "phone": "phone from resume",
+  "location": "location from resume",
+  "linkedin": "linkedin from resume",
+  "github": "github from resume",
+  "summary": "3 powerful sentences: [Job Title] with [X]+ years experience in [key tech]. Specialized in [specific skills with measurable impact]. Proven track record of [achievement with number].",
+  "experience": [
+    {
+      "title": "Job Title",
+      "company": "Company Name",
+      "duration": "Month Year - Present",
+      "location": "City, State",
+      "points": [
+        "Architected and deployed [specific feature] using [tech stack], resulting in [X]% improvement in [metric]",
+        "Engineered [specific solution] with [technology], reducing [problem] by [X]% and saving [time/cost]",
+        "Collaborated with [team size] cross-functional team to deliver [project] with [X]% increase in [business metric]",
+        "Implemented [specific technical detail] using [tools], achieving [measurable outcome]"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "exact degree from resume",
+      "institution": "exact institution from resume",
+      "year": "year from resume",
+      "gpa": ""
+    }
+  ],
+  "skills": {
+    "technical": ["list all technical skills including missing keywords naturally"],
+    "tools": ["all tools and platforms"],
+    "soft": ["Leadership", "Communication", "Problem Solving", "Agile", "CI/CD"]
+  },
+  "projects": [
+    {
+      "name": "Project Name from resume",
+      "tech": "All technologies used",
+      "points": [
+        "Designed and developed [specific feature] using [exact tech stack] with [architecture pattern], handling [scale/users]",
+        "Implemented [specific technical feature like auth/API/database] using [technology], achieving [performance metric]",
+        "Integrated [third-party service or feature] resulting in [X]% improvement in [user metric or performance]",
+        "Deployed on [platform] with [CI/CD tool], maintaining [X]% uptime and reducing deployment time by [X]%"
+      ]
+    }
+  ],
+  "certifications": [],
+  "languages": ["English (Fluent)"],
+  "atsScore": 92
+}
+
+IMPORTANT: Base ALL content on the actual resume provided. Do NOT invent companies or degrees. DO enhance project descriptions significantly with technical depth and metrics.`;
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.2,
+        max_tokens: 4000
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const text = data.choices?.[0]?.message?.content;
+    if (!text) throw new Error('No response from AI');
+
     const cleaned = text
       .replace(/```json/g, '')
       .replace(/```/g, '')

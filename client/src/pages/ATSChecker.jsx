@@ -205,7 +205,9 @@ const ATSChecker = () => {
     );
   }
 
-  const handleFileChange = (e) => {
+  /* const handleFileChange = (e) => {
+
+
     const f = e.target.files[0];
     if (!f) return;
     if (f.type !== 'application/pdf') {
@@ -219,7 +221,31 @@ const ATSChecker = () => {
     setFile(f);
     setFileName(f.name);
     setResult(null);
-  };
+  }; */
+
+  const handleFileChange = (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+
+  // Accept by extension too not just mimetype
+  const isPDF =
+    f.type === 'application/pdf' ||
+    f.name.toLowerCase().endsWith('.pdf');
+
+  if (!isPDF) {
+    toast.error('Only PDF files are allowed');
+    return;
+  }
+
+  if (f.size > 10 * 1024 * 1024) {
+    toast.error('File size must be less than 10MB');
+    return;
+  }
+
+  setFile(f);
+  setFileName(f.name);
+  setResult(null);
+};
 
   const handleAnalyze = async () => {
     if (!file) {
